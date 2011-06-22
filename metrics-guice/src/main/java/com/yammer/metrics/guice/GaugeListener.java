@@ -10,13 +10,20 @@ import java.lang.reflect.Method;
  * A listener which adds gauge injection listeners to classes with gauges.
  */
 public class GaugeListener implements TypeListener {
+    
+    private final MetricsBaptizer baptizer;
+
+    public GaugeListener(final MetricsBaptizer baptizer) {
+        this.baptizer = baptizer;
+    }
+
     @Override
     public <I> void hear(final TypeLiteral<I> literal, TypeEncounter<I> encounter) {
         for (final Method method : literal.getRawType().getMethods()) {
             final Gauge annotation = method.getAnnotation(Gauge.class);
             if (annotation != null) {
                 if (method.getParameterTypes().length == 0) {
-                    final String name = annotation.name().isEmpty() ? method.getName() : annotation.name();
+                    final String name = this.baptizer.giveNameTo(annotation.name(), method);
                     encounter.register(new GaugeInjectionListener<I>(literal, name, method));
                 } else {
                     encounter.addError("Method %s is annotated with @Gauge but requires parameters.", method);
@@ -24,5 +31,4 @@ public class GaugeListener implements TypeListener {
             }
         }
     }
-
 }

@@ -13,13 +13,20 @@ import java.lang.reflect.Method;
  * A listener which adds method interceptors to metered methods.
  */
 public class MeteredListener implements TypeListener {
+
+    private final MetricsBaptizer baptizer;
+
+    public MeteredListener(final MetricsBaptizer baptizer) {
+        this.baptizer = baptizer;
+    }
+
     @Override
     public <T> void hear(TypeLiteral<T> literal,
                          TypeEncounter<T> encounter) {
         for (Method method : literal.getRawType().getMethods()) {
             final Metered annotation = method.getAnnotation(Metered.class);
             if (annotation != null) {
-                final String name = annotation.name().isEmpty() ? method.getName() : annotation.name();
+                final String name = this.baptizer.giveNameTo(annotation.name(), method);
                 final MeterMetric meter = Metrics.newMeter(literal.getRawType(), name, annotation.eventType(), annotation.rateUnit());
                 encounter.bindInterceptor(Matchers.only(method), new MeteredInterceptor(meter));
             }
