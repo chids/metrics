@@ -1,4 +1,5 @@
 package com.yammer.metrics.reporting.tests;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ReturnValues;
 
 import com.yammer.metrics.core.Clock;
 import com.yammer.metrics.core.CounterMetric;
@@ -26,6 +26,7 @@ import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.core.Stoppable;
 import com.yammer.metrics.core.TimerMetric;
 import com.yammer.metrics.reporting.AbstractPollingReporter;
+
 public abstract class AbstractPollingReporterTest {
 
     protected final Clock clock = mock(Clock.class);
@@ -53,7 +54,7 @@ public abstract class AbstractPollingReporterTest {
         final T metric = action.call();
         try{
             // Add the metric to the registry, run the reporter and flush the result
-            registry.add(new MetricName(getClass(), metric.getClass().getSimpleName()), metric);
+            registry.add(new MetricName(Object.class, "metric"), metric);
             reporter.run();
             out.flush();
             final String[] lines = out.toString().split("\n");
@@ -130,6 +131,7 @@ public abstract class AbstractPollingReporterTest {
 
     @Test
     public final void gauge() throws Exception {
+        final String value = "gaugeValue";
         assertReporterOutput(
                 new Callable<GaugeMetric<String>>() {
                     @Override
@@ -137,15 +139,15 @@ public abstract class AbstractPollingReporterTest {
                         return new GaugeMetric<String>() {
                             @Override
                             public String value() {
-                                return GaugeMetric.class.getSimpleName();
+                                return value;
                             }
                         };
                     }
                 },
-                expectedGaugeResult());
+                expectedGaugeResult(value));
     }
 
-    public abstract String[] expectedGaugeResult();
+    public abstract String[] expectedGaugeResult(String value);
 
     public abstract String[] expectedTimerResult();
 
