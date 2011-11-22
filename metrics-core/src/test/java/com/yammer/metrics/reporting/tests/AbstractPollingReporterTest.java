@@ -122,7 +122,7 @@ public abstract class AbstractPollingReporterTest {
                 new Callable<TimerMetric>() {
                     @Override
                     public TimerMetric call() throws Exception {
-                        // Not doing anything here since untill we have a good way of how to test Timer with fixed result values
+                        // Not doing anything with the timer until we have a good way of how to test Timer with fixed result values
                         return new TimerMetric(registry.newMeterTickThreadPool(), TimeUnit.MILLISECONDS, TimeUnit.SECONDS, clock);
                     }
                 },
