@@ -60,11 +60,15 @@ public abstract class AbstractPollingReporterTest {
             final String[] lines = out.toString().split("\n");
             // Assertions: first check that the line count matches then compare line by line ignoring leading and trailing whitespace
             assertEquals("Line count mismatch, was:\n" + Arrays.toString(lines), expected.length, lines.length);
-            for(int i = 0; i < lines.length; i++){
+            for(int i = 0; i < lines.length; i++) {
+                if(!expected[i].trim().equals(lines[i].trim())) {
+                    System.err.println("Failure comparing line " + (1 + i));
+                }
                 assertEquals(expected[i].trim(), lines[i].trim());
             }
         }
         finally{
+            reporter.shutdown();
             if(metric instanceof Stoppable){
                 ((Stoppable)metric).stop();
             }
