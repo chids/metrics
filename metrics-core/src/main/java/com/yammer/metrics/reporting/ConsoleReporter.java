@@ -18,9 +18,6 @@ import java.util.concurrent.TimeUnit;
  * {@link PrintStream} periodically.
  */
 public class ConsoleReporter extends AbstractPollingReporter implements MetricsProcessor<PrintStream> {
-    private final PrintStream out;
-    private final MetricPredicate predicate;
-    private final Clock clock;
 
     /**
      * Enables the console reporter for the default metrics registry, and causes it to
