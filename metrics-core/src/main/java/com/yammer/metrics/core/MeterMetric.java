@@ -148,7 +148,7 @@ public class MeterMetric implements Metered, Stoppable {
     }
 
     @Override
-    public <T> void processWith(MetricsProcessor<T> processor, T context) throws Exception {
-        processor.processMeter(this, context);
+    public <T> void processWith(MetricsProcessor<T> processor, MetricName name, T context) throws Exception {
+        processor.processMeter(name, this, context);
     }
 }

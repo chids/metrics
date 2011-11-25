@@ -101,14 +101,14 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
                 out.print('=');
             }
             out.println();
-            for (Entry<String, Map<String, Metric>> entry : Utils.sortAndFilterMetrics(metricsRegistry.allMetrics(), predicate).entrySet()) {
+            for (Entry<String, Map<MetricName, Metric>> entry : Utils.sortAndFilterMetrics(metricsRegistry.allMetrics(), predicate).entrySet()) {
                 out.print(entry.getKey());
                 out.println(':');
-                for (Entry<String, Metric> subEntry : entry.getValue().entrySet()) {
+                for (Entry<MetricName, Metric> subEntry : entry.getValue().entrySet()) {
                     out.print("  ");
-                    out.print(subEntry.getKey());
+                    out.print(subEntry.getKey().getName());
                     out.println(':');
-                    subEntry.getValue().processWith(this, out);
+                    subEntry.getValue().processWith(this, subEntry.getKey(), out);
                     out.println();
                 }
                 out.println();
@@ -121,19 +121,19 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
     }
     
     @Override
-    public void processGauge(GaugeMetric<?> gauge, PrintStream stream) {
+    public void processGauge(MetricName name, GaugeMetric<?> gauge, PrintStream stream) {
         stream.print("    value = ");
         stream.println(gauge.value());
     }
 
     @Override
-    public void processCounter(CounterMetric counter, PrintStream stream) {
+    public void processCounter(MetricName name, CounterMetric counter, PrintStream stream) {
         stream.print("    count = ");
         stream.println(counter.count());
     }
 
     @Override
-    public void processMeter(Metered meter, PrintStream stream) {
+    public void processMeter(MetricName name, Metered meter, PrintStream stream) {
         final String unit = abbrev(meter.rateUnit());
         stream.printf("             count = %d\n", meter.count());
         stream.printf("         mean rate = %2.2f %s/%s\n", meter.meanRate(), meter.eventType(), unit);
@@ -143,7 +143,7 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
     }
 
     @Override
-    public void processHistogram(HistogramMetric histogram, PrintStream stream) {
+    public void processHistogram(MetricName name, HistogramMetric histogram, PrintStream stream) {
         final double[] percentiles = histogram.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
         stream.printf("               min = %2.2f\n", histogram.min());
         stream.printf("               max = %2.2f\n", histogram.max());
@@ -158,8 +158,8 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
     }
 
     @Override
-    public void processTimer(TimerMetric timer, PrintStream stream) {
-        processMeter(timer, stream);
+    public void processTimer(MetricName name, TimerMetric timer, PrintStream stream) {
+        processMeter(name, timer, stream);
         final String durationUnit = abbrev(timer.durationUnit());
         final double[] percentiles = timer.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
         stream.printf("               min = %2.2f%s\n", timer.min(), durationUnit);

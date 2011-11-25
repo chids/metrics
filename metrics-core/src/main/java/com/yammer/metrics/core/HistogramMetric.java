@@ -282,7 +282,7 @@ public class HistogramMetric implements Metric {
     }
 
     @Override
-    public <T> void processWith(final MetricsProcessor<T> processor, final T context) throws Exception {
-        processor.processHistogram(this, context);
+    public <T> void processWith(MetricsProcessor<T> processor, MetricName name, T context) throws Exception {
+        processor.processHistogram(name, this, context);
     }
 }

@@ -323,34 +323,34 @@ public class JmxReporter extends AbstractReporter implements MetricsRegistryList
     public void onMetricAdded(MetricName name, Metric metric) {
         if (metric != null) {
             try {
-                metric.processWith(this, new Context(name, new ObjectName(name.getMBeanName())));
+                metric.processWith(this, name, new Context(name, new ObjectName(name.getMBeanName())));
             } catch (Exception ignored) {
             }
         }
     }
 
     @Override
-    public void processMeter(Metered meter, Context context) throws Exception {
+    public void processMeter(MetricName name, Metered meter, Context context) throws Exception {
         registerBean(context.metricName, new Meter(meter, context.objectName), context.objectName);
     }
 
     @Override
-    public void processCounter(CounterMetric counter, Context context) throws Exception {
+    public void processCounter(MetricName name, CounterMetric counter, Context context) throws Exception {
         registerBean(context.metricName, new Counter(counter, context.objectName), context.objectName);
     }
 
     @Override
-    public void processHistogram(HistogramMetric histogram, Context context) throws Exception {
+    public void processHistogram(MetricName name, HistogramMetric histogram, Context context) throws Exception {
         registerBean(context.metricName, new Histogram(histogram, context.objectName), context.objectName);
     }
 
     @Override
-    public void processTimer(TimerMetric timer, Context context) throws Exception {
+    public void processTimer(MetricName name, TimerMetric timer, Context context) throws Exception {
         registerBean(context.metricName, new Timer(timer, context.objectName), context.objectName);
     }
 
     @Override
-    public void processGauge(GaugeMetric<?> gauge, Context context) throws Exception {
+    public void processGauge(MetricName name, GaugeMetric<?> gauge, Context context) throws Exception {
         registerBean(context.metricName, new Gauge(gauge, context.objectName), context.objectName);
     }
     
