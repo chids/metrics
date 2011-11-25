@@ -249,7 +249,7 @@ public class TimerMetric implements Metered, Stoppable {
     }
 
     @Override
-    public <T >void processWith(MetricsProcessor<T> processor, T context) throws Exception {
-        processor.processTimer(this, context);
+    public <T >void processWith(MetricsProcessor<T> processor, MetricName name, T context) throws Exception {
+        processor.processTimer(name, this, context);
     }
 }

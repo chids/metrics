@@ -58,7 +58,7 @@ public class CounterMetric implements Metric {
     }
 
     @Override
-    public <T> void processWith(MetricsProcessor<T> processor, T context) throws Exception {
-        processor.processCounter(this, context);
+    public <T> void processWith(MetricsProcessor<T> processor, MetricName name, T context) throws Exception {
+        processor.processCounter(name, this, context);
     }
 }

@@ -96,7 +96,7 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
                         }
                         
                     };
-                    metric.processWith(this, context);
+                    metric.processWith(this, entry.getKey(), context);
                 }
             }
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
     }
     
     @Override
-    public void processMeter(Metered meter, Context context)  throws IOException {
+    public void processMeter(MetricName name, Metered meter, Context context)  throws IOException {
         final PrintStream stream = context.getStream("# time,count,1 min rate,mean rate,5 min rate,15 min rate");
         stream.append(new StringBuilder()
             .append(meter.count()).append(',')
@@ -122,14 +122,14 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
     }
 
     @Override
-    public void processCounter(CounterMetric counter, Context context) throws IOException {
+    public void processCounter(MetricName name, CounterMetric counter, Context context) throws IOException {
         final PrintStream stream = context.getStream("# time,count");
         stream.println(counter.count());
         stream.flush();
     }
 
     @Override
-    public void processHistogram(HistogramMetric histogram, Context context) throws IOException {
+    public void processHistogram(MetricName name, HistogramMetric histogram, Context context) throws IOException {
         final PrintStream stream = context.getStream("# time,min,max,mean,median,stddev,90%,95%,99%");
         final double[] percentiles = histogram.percentiles(0.5, 0.90, 0.95, 0.99);
         stream.append(new StringBuilder()
@@ -147,7 +147,7 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
     }
 
     @Override
-    public void processTimer(TimerMetric timer, Context context) throws IOException {
+    public void processTimer(MetricName name, TimerMetric timer, Context context) throws IOException {
         final PrintStream stream = context.getStream("# time,min,max,mean,median,stddev,90%,95%,99%");
         final double[] percentiles = timer.percentiles(0.5, 0.90, 0.95, 0.99);
         stream.append(new StringBuilder()
@@ -164,7 +164,7 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
     }
 
     @Override
-    public void processGauge(GaugeMetric<?> gauge, Context context) throws IOException {
+    public void processGauge(MetricName name, GaugeMetric<?> gauge, Context context) throws IOException {
         final PrintStream stream = context.getStream("# time,value");
         stream.println(gauge.value());
         stream.flush();

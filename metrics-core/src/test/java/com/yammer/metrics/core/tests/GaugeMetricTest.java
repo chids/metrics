@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import com.yammer.metrics.core.GaugeMetric;
+import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsProcessor;
 
 public class GaugeMetricTest {
@@ -14,9 +15,8 @@ public class GaugeMetricTest {
         public String value() {
             return "woo";
         }
-
         @Override
-        public <T> void processWith(MetricsProcessor<T> reporter, T context) throws Exception {}
+        public <T> void processWith(MetricsProcessor<T> reporter, MetricName name, T context) throws Exception {}
     };
 
     @Test

@@ -6,5 +6,5 @@ package com.yammer.metrics.core;
  */
 public interface Metric {
 
-    <T> void processWith(MetricsProcessor<T> reporter, T context) throws Exception;
+    <T> void processWith(MetricsProcessor<T> reporter, MetricName name, T context) throws Exception;
 }
