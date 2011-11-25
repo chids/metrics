@@ -63,6 +63,8 @@ public abstract class AbstractPollingReporterTest {
             for(int i = 0; i < lines.length; i++) {
                 if(!expected[i].trim().equals(lines[i].trim())) {
                     System.err.println("Failure comparing line " + (1 + i));
+                    System.err.println("Was:      '" + lines[i] + "'");
+                    System.err.println("Expected: '" + expected[i] + "'\n");
                 }
                 assertEquals(expected[i].trim(), lines[i].trim());
             }
