@@ -29,6 +29,7 @@ import com.yammer.metrics.core.GaugeMetric;
 import com.yammer.metrics.core.HistogramMetric;
 import com.yammer.metrics.core.Metered;
 import com.yammer.metrics.core.Metric;
+import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsProcessor;
 import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.core.TimerMetric;
@@ -211,6 +212,7 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
                            MetricPredicate predicate, boolean useShortNames) throws IOException {
         this(metricsRegistry, groupPrefix, predicate, useShortNames, new GangliaMessageBuilder(gangliaHost, port));
     }
+
      /**
      * Creates a new {@link GangliaReporter}.
      *
@@ -242,13 +244,12 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
     }
 
     private void printRegularMetrics() {
-        for (Map.Entry<String, Map<String, Metric>> entry : Utils.sortAndFilterMetrics(metricsRegistry.allMetrics(), this.predicate).entrySet()) {
-            for (Map.Entry<String, Metric> subEntry : entry.getValue().entrySet()) {
-                final String simpleName = sanitizeName(entry.getKey() + "." + subEntry.getKey());
+        for (Map.Entry<String, Map<MetricName, Metric>> entry : Utils.sortAndFilterMetrics(metricsRegistry.allMetrics(), this.predicate).entrySet()) {
+            for (Map.Entry<MetricName, Metric> subEntry : entry.getValue().entrySet()) {
                 final Metric metric = subEntry.getValue();
                 if (metric != null) {
                     try {
-                        metric.processWith(this, simpleName);
+                        metric.processWith(this, subEntry.getKey(), null);
                     } catch (Exception ignored) {
                         LOG.error("Error printing regular metrics:", ignored);
                     }
@@ -300,20 +301,18 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
                 .send();
     }
 
-
-
     @Override
-    public void processGauge(GaugeMetric<?> gauge, String name) throws IOException {
+    public void processGauge(MetricName name, GaugeMetric<?> gauge, String x) throws IOException {
         sendToGanglia(sanitizeName(name), GANGLIA_INT_TYPE, String.format(locale, "%s", gauge.value()), "gauge");
     }
 
     @Override
-    public void processCounter(CounterMetric counter, String name) throws IOException {
+    public void processCounter(MetricName name, CounterMetric counter, String x) throws IOException {
         sendToGanglia(sanitizeName(name), GANGLIA_INT_TYPE, String.format(locale, "%d", counter.count()), "counter");
     }
 
     @Override
-    public void processMeter(Metered meter, String name) throws IOException {
+    public void processMeter(MetricName name, Metered meter, String x) throws IOException {
         final String sanitizedName = sanitizeName(name);
         final String units = meter.rateUnit().name();
         printLongField(sanitizedName + ".count", meter.count(), "metered", units);
@@ -324,7 +323,7 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
     }
 
     @Override
-    public void processHistogram(HistogramMetric histogram, String name) throws IOException {
+    public void processHistogram(MetricName name, HistogramMetric histogram, String x) throws IOException {
         final String sanitizedName = sanitizeName(name);
         final double[] percentiles = histogram.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
         // TODO:  what units make sense for histograms?  should we add event type to the Histogram metric?
@@ -341,8 +340,8 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
     }
 
     @Override
-    public void processTimer(TimerMetric timer, String name) throws IOException {
-        processMeter(timer, name);
+    public void processTimer(MetricName name, TimerMetric timer, String x) throws IOException {
+        processMeter(name, timer, x);
         final String sanitizedName = sanitizeName(name);
         final double[] percentiles = timer.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
         final String durationUnit = timer.durationUnit().name();
@@ -359,7 +358,7 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
     }
 
     private void printDoubleField(String name, double value, String groupName, String units) {
-        sendToGanglia(sanitizeName(name), GANGLIA_DOUBLE_TYPE, String.format(locale, "%2.2f", value), groupName, units);
+        sendToGanglia(name, GANGLIA_DOUBLE_TYPE, String.format(locale, "%2.2f", value), groupName, units);
     }
 
     private void printDoubleField(String name, double value, String groupName) {
@@ -372,7 +371,7 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
 
     private void printLongField(String name, long value, String groupName, String units) {
         // TODO:  ganglia does not support int64, what should we do here?
-        sendToGanglia(sanitizeName(name), GANGLIA_INT_TYPE, String.format(locale, "%d", value), groupName, units);
+        sendToGanglia(name, GANGLIA_INT_TYPE, String.format(locale, "%d", value), groupName, units);
     }
 
     private void printVmMetrics() {
@@ -407,10 +406,12 @@ public class GangliaReporter extends AbstractPollingReporter implements MetricsP
         }
     }
 
-    protected String sanitizeName(String metricName) {
-        if (metricName == null || metricName.equals("")) {
-            return metricName;
+    protected String sanitizeName(MetricName name) {
+        if (name == null) {
+            return "";
         }
+        final String qualifiedTypeName = name.getGroup() + "." + name.getType() + "." + name.getName();
+        final String metricName = name.hasScope() ? qualifiedTypeName + '.' + name.getScope() : qualifiedTypeName;
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < metricName.length(); i++) {
             char p = metricName.charAt(i);
