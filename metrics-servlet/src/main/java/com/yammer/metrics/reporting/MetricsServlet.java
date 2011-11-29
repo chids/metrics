@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -262,7 +263,6 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
         Context(JsonGenerator json, boolean showFullSamples) {
             this.json = json;
             this.showFullSamples = showFullSamples;
-            
         }
     }
 
@@ -287,14 +287,14 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
         json.close();
     }
 
-    private void writeRegularMetrics(JsonGenerator json, String classPrefix, boolean showFullSamples) throws IOException {
+    public void writeRegularMetrics(JsonGenerator json, String classPrefix, boolean showFullSamples) throws IOException {
         for (Entry<String, Map<MetricName, Metric>> entry : Utils.sortMetrics(metricsRegistry.allMetrics()).entrySet()) {
             if (classPrefix == null || entry.getKey().startsWith(classPrefix)) {
                 json.writeFieldName(entry.getKey());
                 json.writeStartObject();
                 {
                     for (Entry<MetricName, Metric> subEntry : entry.getValue().entrySet()) {
-                        json.writeFieldName(subEntry.getKey().toString("."));
+                        json.writeFieldName(subEntry.getKey().getName());
                         try {
                             subEntry.getValue().processWith(this, subEntry.getKey(), new Context(json, showFullSamples));
                         }
@@ -423,7 +423,6 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
                 }
             }
             json.writeEndObject();
-
         }
         json.writeEndObject();
     }
@@ -435,12 +434,7 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
         {
             json.writeStringField("type", "meter");
             json.writeStringField("event_type", meter.eventType());
-            json.writeStringField("unit", meter.rateUnit().toString().toLowerCase());
-            json.writeNumberField("count", meter.count());
-            json.writeNumberField("mean", meter.meanRate());
-            json.writeNumberField("m1", meter.oneMinuteRate());
-            json.writeNumberField("m5", meter.fiveMinuteRate());
-            json.writeNumberField("m15", meter.fifteenMinuteRate());
+            writeMeterdFields(meter, json);
         }
         json.writeEndObject();
     }
@@ -477,15 +471,19 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
             json.writeFieldName("rate");
             json.writeStartObject();
             {
-                json.writeStringField("unit", timer.rateUnit().toString().toLowerCase());
-                json.writeNumberField("count", timer.count());
-                json.writeNumberField("mean", timer.meanRate());
-                json.writeNumberField("m1", timer.oneMinuteRate());
-                json.writeNumberField("m5", timer.fiveMinuteRate());
-                json.writeNumberField("m15", timer.fifteenMinuteRate());
+                writeMeterdFields(timer, json);
             }
             json.writeEndObject();
         }
         json.writeEndObject();
+    }
+    
+    private static void writeMeterdFields(Metered metered, JsonGenerator json) throws IOException {
+        json.writeStringField("unit", metered.rateUnit().toString().toLowerCase());
+        json.writeNumberField("count", metered.count());
+        json.writeNumberField("mean", metered.meanRate());
+        json.writeNumberField("m1", metered.oneMinuteRate());
+        json.writeNumberField("m5", metered.fiveMinuteRate());
+        json.writeNumberField("m15", metered.fifteenMinuteRate());
     }
 }
