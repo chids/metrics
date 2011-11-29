@@ -144,7 +144,7 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
 
     @Override
     public void processHistogram(MetricName name, HistogramMetric histogram, PrintStream stream) {
-        final double[] percentiles = histogram.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
+        final Double[] percentiles = histogram.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
         stream.printf("               min = %2.2f\n", histogram.min());
         stream.printf("               max = %2.2f\n", histogram.max());
         stream.printf("              mean = %2.2f\n", histogram.mean());
@@ -161,7 +161,7 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
     public void processTimer(MetricName name, TimerMetric timer, PrintStream stream) {
         processMeter(name, timer, stream);
         final String durationUnit = abbrev(timer.durationUnit());
-        final double[] percentiles = timer.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
+        final Double[] percentiles = timer.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
         stream.printf("               min = %2.2f%s\n", timer.min(), durationUnit);
         stream.printf("               max = %2.2f%s\n", timer.max(), durationUnit);
         stream.printf("              mean = %2.2f%s\n", timer.mean(), durationUnit);
@@ -173,7 +173,7 @@ public class ConsoleReporter extends AbstractPollingReporter implements MetricsP
         stream.printf("              99%% <= %2.2f%s\n", percentiles[4], durationUnit);
         stream.printf("            99.9%% <= %2.2f%s\n", percentiles[5], durationUnit);
     }
-
+    
     private String abbrev(TimeUnit unit) {
         switch (unit) {
             case NANOSECONDS:

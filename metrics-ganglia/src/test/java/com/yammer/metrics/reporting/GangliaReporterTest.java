@@ -148,7 +148,7 @@ public class GangliaReporterTest extends AbstractPollingReporterTest
     }
 
     @Override
-    public String[] expectedCounterResult(int count)
+    public String[] expectedCounterResult(long count)
     {
         return String.format(getFromFile("counter.io"), count).split("\\n");
     }

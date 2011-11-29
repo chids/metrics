@@ -15,7 +15,7 @@ import com.yammer.metrics.core.HistogramMetric.SampleType;
  * A timer metric which aggregates timing durations and provides duration
  * statistics, plus throughput statistics via {@link MeterMetric}.
  */
-public class TimerMetric implements Metered, Stoppable {
+public class TimerMetric implements Metered, Stoppable, Percentiled, Summarized {
 
     private final TimeUnit durationUnit, rateUnit;
     private final MeterMetric meter;
@@ -156,6 +156,7 @@ public class TimerMetric implements Metered, Stoppable {
      *
      * @return the longest recorded duration
      */
+    @Override
     public double max() { return convertFromNS(histogram.max()); }
 
     /**
@@ -163,6 +164,7 @@ public class TimerMetric implements Metered, Stoppable {
      *
      * @return the shortest recorded duration
      */
+    @Override
     public double min() { return convertFromNS(histogram.min()); }
 
     /**
@@ -170,6 +172,7 @@ public class TimerMetric implements Metered, Stoppable {
      *
      * @return the arithmetic mean of all recorded durations
      */
+    @Override
     public double mean() { return convertFromNS(histogram.mean()); }
 
     /**
@@ -177,26 +180,23 @@ public class TimerMetric implements Metered, Stoppable {
      *
      * @return the standard deviation of all recorded durations
      */
+    @Override
     public double stdDev() { return convertFromNS(histogram.stdDev()); }
 
-    /**
-     * Returns the duration at the given percentile.
-     *
-     * @param percentile    a percentile ({@code 0..1})
-     * @return the duration at the given percentile
+    /* (non-Javadoc)
+     * @see com.yammer.metrics.core.Percentiled#percentile(double)
      */
+    @Override
     public double percentile(double percentile) {
         return percentiles(percentile)[0];
     }
 
-    /**
-     * Returns an array of durations at the given percentiles.
-     *
-     * @param percentiles one or more percentiles ({@code 0..1})
-     * @return an array of durations at the given percentiles
+    /* (non-Javadoc)
+     * @see com.yammer.metrics.core.Percentiled#percentiles(double)
      */
-    public double[] percentiles(double... percentiles) {
-        final double[] scores = histogram.percentiles(percentiles);
+    @Override
+    public Double[] percentiles(Double... percentiles) {
+        final Double[] scores = histogram.percentiles(percentiles);
         for (int i = 0; i < scores.length; i++) {
             scores[i] = convertFromNS(scores[i]);
         }

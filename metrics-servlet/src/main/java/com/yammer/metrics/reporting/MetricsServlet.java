@@ -49,6 +49,8 @@ import com.yammer.metrics.core.Metric;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsProcessor;
 import com.yammer.metrics.core.MetricsRegistry;
+import com.yammer.metrics.core.Percentiled;
+import com.yammer.metrics.core.Summarized;
 import com.yammer.metrics.core.TimerMetric;
 import com.yammer.metrics.core.VirtualMachineMetrics.GarbageCollector;
 import com.yammer.metrics.util.Utils;
@@ -314,18 +316,8 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
         {
             json.writeStringField("type", "histogram");
             json.writeNumberField("count", histogram.count());
-            json.writeNumberField("min", histogram.min());
-            json.writeNumberField("max", histogram.max());
-            json.writeNumberField("mean", histogram.mean());
-            json.writeNumberField("std_dev", histogram.stdDev());
-
-            final double[] percentiles = histogram.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
-            json.writeNumberField("median", percentiles[0]);
-            json.writeNumberField("p75", percentiles[1]);
-            json.writeNumberField("p95", percentiles[2]);
-            json.writeNumberField("p98", percentiles[3]);
-            json.writeNumberField("p99", percentiles[4]);
-            json.writeNumberField("p999", percentiles[5]);
+            writeSummarized(histogram, json);
+            writePercentiles(histogram, json);
 
             if (context.showFullSamples) {
                 json.writeObjectField("values", histogram.values());
@@ -434,7 +426,7 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
         {
             json.writeStringField("type", "meter");
             json.writeStringField("event_type", meter.eventType());
-            writeMeterdFields(meter, json);
+            writeMeteredFields(meter, json);
         }
         json.writeEndObject();
     }
@@ -449,19 +441,8 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
             json.writeStartObject();
             {
                 json.writeStringField("unit", timer.durationUnit().toString().toLowerCase());
-                json.writeNumberField("min", timer.min());
-                json.writeNumberField("max", timer.max());
-                json.writeNumberField("mean", timer.mean());
-                json.writeNumberField("std_dev", timer.stdDev());
-
-                final double[] percentiles = timer.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
-                json.writeNumberField("median", percentiles[0]);
-                json.writeNumberField("p75", percentiles[1]);
-                json.writeNumberField("p95", percentiles[2]);
-                json.writeNumberField("p98", percentiles[3]);
-                json.writeNumberField("p99", percentiles[4]);
-                json.writeNumberField("p999", percentiles[5]);
-
+                writeSummarized(timer,json);
+                writePercentiles(timer, json);
                 if (context.showFullSamples) {
                     json.writeObjectField("values", timer.values());
                 }
@@ -471,14 +452,31 @@ public class MetricsServlet extends HttpServlet implements MetricsProcessor<Metr
             json.writeFieldName("rate");
             json.writeStartObject();
             {
-                writeMeterdFields(timer, json);
+                writeMeteredFields(timer, json);
             }
             json.writeEndObject();
         }
         json.writeEndObject();
     }
+
+    private static void writeSummarized(Summarized metric, JsonGenerator json) throws IOException, JsonGenerationException {
+        json.writeNumberField("min", metric.min());
+        json.writeNumberField("max", metric.max());
+        json.writeNumberField("mean", metric.mean());
+        json.writeNumberField("std_dev", metric.stdDev());
+    }
     
-    private static void writeMeterdFields(Metered metered, JsonGenerator json) throws IOException {
+    private static void writePercentiles(Percentiled metric, JsonGenerator json) throws IOException, JsonGenerationException {
+        final Double[] percentiles = metric.percentiles(0.5, 0.75, 0.95, 0.98, 0.99, 0.999);
+        json.writeNumberField("median", percentiles[0]);
+        json.writeNumberField("p75", percentiles[1]);
+        json.writeNumberField("p95", percentiles[2]);
+        json.writeNumberField("p98", percentiles[3]);
+        json.writeNumberField("p99", percentiles[4]);
+        json.writeNumberField("p999", percentiles[5]);
+    }
+    
+    private static void writeMeteredFields(Metered metered, JsonGenerator json) throws IOException {
         json.writeStringField("unit", metered.rateUnit().toString().toLowerCase());
         json.writeNumberField("count", metered.count());
         json.writeNumberField("mean", metered.meanRate());

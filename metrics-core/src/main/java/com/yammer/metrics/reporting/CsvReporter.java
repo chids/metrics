@@ -131,7 +131,7 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
     @Override
     public void processHistogram(MetricName name, HistogramMetric histogram, Context context) throws IOException {
         final PrintStream stream = context.getStream("# time,min,max,mean,median,stddev,90%,95%,99%");
-        final double[] percentiles = histogram.percentiles(0.5, 0.90, 0.95, 0.99);
+        final Double[] percentiles = histogram.percentiles(0.5, 0.90, 0.95, 0.99);
         stream.append(new StringBuilder()
             .append(histogram.min()).append(',')
             .append(histogram.max()).append(',')
@@ -149,7 +149,7 @@ public class CsvReporter extends AbstractPollingReporter implements MetricsProce
     @Override
     public void processTimer(MetricName name, TimerMetric timer, Context context) throws IOException {
         final PrintStream stream = context.getStream("# time,min,max,mean,median,stddev,90%,95%,99%");
-        final double[] percentiles = timer.percentiles(0.5, 0.90, 0.95, 0.99);
+        final Double[] percentiles = timer.percentiles(0.5, 0.90, 0.95, 0.99);
         stream.append(new StringBuilder()
             .append(timer.min()).append(',')
             .append(timer.max()).append(',')
