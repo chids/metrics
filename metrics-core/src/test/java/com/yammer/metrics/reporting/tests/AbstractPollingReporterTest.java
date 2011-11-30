@@ -32,7 +32,6 @@ import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsProcessor;
 import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.core.Percentiled;
-import com.yammer.metrics.core.Stoppable;
 import com.yammer.metrics.core.Summarized;
 import com.yammer.metrics.core.TimerMetric;
 import com.yammer.metrics.reporting.AbstractPollingReporter;
