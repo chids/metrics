@@ -151,30 +151,6 @@ public class MetricName {
         return mbeanName;
     }
     
-    /**
-     * Returns all set parts of this {@link MetricName} joined by the supplied separator in the following order:
-     * <ol>
-     * <li>group</li>
-     * <li>type</li>
-     * <li>scope (if defined)</li>
-     * <li>name (if not blank)</li>
-     * </ol>
-     * @param separator
-     * @return
-     */
-    public String toString(String separator) {
-        final StringBuilder result = new StringBuilder()
-            .append(group).append(separator)
-            .append(type).append(separator);
-        if(hasScope()) {
-            result.append(scope).append(separator);
-        }
-        if(name.length() > 0) { 
-            result.append(name).append(separator);
-        }
-        return result.toString();
-    }
-    
     private static String createMBeanName(String group, String type, String name, String scope){
         StringBuilder mbeanNameBuilder = new StringBuilder();
 
