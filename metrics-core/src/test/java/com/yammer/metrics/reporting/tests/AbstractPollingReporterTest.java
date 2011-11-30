@@ -82,9 +82,6 @@ public abstract class AbstractPollingReporterTest {
         }
         finally {
             reporter.shutdown();
-            if(metric instanceof Stoppable) {
-                ((Stoppable)metric).stop();
-            }
         }
     }
 
