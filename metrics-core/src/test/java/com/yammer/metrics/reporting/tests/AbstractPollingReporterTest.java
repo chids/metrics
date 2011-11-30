@@ -258,14 +258,8 @@ public abstract class AbstractPollingReporterTest {
         doAnswer(new Answer<Double[]>() {
             @Override
             public Double[] answer(InvocationOnMock invocation) throws Throwable {
-                // FIXME: Cleaner way of converting to Double[]?
                 final Object[] arguments = invocation.getArguments();
-                final Double[] result = new Double[arguments.length];
-                int i = 0;
-                for(final Object arg : arguments) {
-                    result[i++] = (Double)arg;
-                }
-                return result;
+                return Arrays.copyOf(arguments, arguments.length, Double[].class);
             }
         }).when(percentiled).percentiles(Mockito.<Double>anyVararg());
     }
