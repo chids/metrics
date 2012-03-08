@@ -30,6 +30,16 @@ import com.yammer.metrics.weld.interceptor.ExceptionMeteredInterceptor;
 import com.yammer.metrics.weld.interceptor.MeteredInterceptor;
 import com.yammer.metrics.weld.interceptor.TimedInterceptor;
 
+/**
+ * A Weld {@link Extension} that:
+ * 
+ * 1. Inspects all methods on all objects and looks for the existence of any metric annotations in which case it
+ * decorates the method with it's Weld counterpart to hook up the appropriate interceptor.
+ * 
+ * 2. Registeres an instance of {@link MetricsRegistryBean} with Weld in order to guarantee that all injections of
+ * {@link MetricsRegistry} uses the same instance.
+ * 
+ */
 public class MetricsWeldExtension implements Extension {
 
 	private static final Logger log = LoggerFactory.getLogger(MetricsWeldExtension.class);
@@ -60,7 +70,7 @@ public class MetricsWeldExtension implements Extension {
 
 						@Override
 						protected <T> void createMetric(AnnotatedMethod<T> method, Class<?> klass) {
-							// Gauges can only be cretaed with a reference to the instance on which 
+							// Gauges can only be cretaed with a reference to the instance on which
 							// they are to be invoked, hence we can't do anything here.
 						}
 					});
@@ -75,7 +85,7 @@ public class MetricsWeldExtension implements Extension {
 			});
 
 	void afterBeanDiscovery(@Observes AfterBeanDiscovery state, BeanManager manager) {
-		state.addBean(new MetricsBean(this.registry, manager));
+		state.addBean(new MetricsRegistryBean(this.registry, manager));
 	}
 
 	<T> void processAnnotatedType(@Observes final ProcessAnnotatedType<T> type) {

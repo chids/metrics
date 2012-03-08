@@ -19,12 +19,15 @@ import javax.inject.Singleton;
 
 import com.yammer.metrics.core.MetricsRegistry;
 
-public class MetricsBean implements Bean<MetricsRegistry> {
+/**
+ * A bean holding a sole instance of a {@link MetricsRegistry}
+ */
+public class MetricsRegistryBean implements Bean<MetricsRegistry> {
 
 	private final InjectionTarget<MetricsRegistry> it;
 	private final MetricsRegistry instance;
 
-	public MetricsBean(MetricsRegistry instance, BeanManager bm) {
+	public MetricsRegistryBean(MetricsRegistry instance, BeanManager bm) {
 		this.instance = instance;
 		final AnnotatedType<MetricsRegistry> at = bm.createAnnotatedType(MetricsRegistry.class);
 		it = bm.createInjectionTarget(at);

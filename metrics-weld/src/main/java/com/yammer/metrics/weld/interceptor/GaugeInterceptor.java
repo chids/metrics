@@ -10,9 +10,10 @@ import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.weld.annotation.WeldGauge;
 
 /**
- * A method interceptor which creates a {@link Gauge} for the declaring class with the given name (or the method's name,
- * if none was provided), and which measures the rate at which the annotated method is invoked.
+ * A method {@link Interceptor} which creates a {@link com.yammer.metrics.core.Gauge} for the declaring class with the
+ * given name (or the method's name, if none was provided) which returns the value returned by the annotated method.
  */
+
 @Interceptor
 @WeldGauge
 public class GaugeInterceptor extends AbstractInterceptor {
@@ -33,7 +34,7 @@ public class GaugeInterceptor extends AbstractInterceptor {
 		});
 		return ctx.proceed();
 	}
-	
+
 	public static MetricName forMethod(final Method method, final Class<?> klass) {
 		final Gauge annotation = method.getAnnotation(Gauge.class);
 		if (method.getParameterTypes().length == 0) {

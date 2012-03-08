@@ -5,13 +5,17 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBinding;
 
+import com.yammer.metrics.annotation.Timed;
+
 /**
- * See the package doc.
+ * Marker {@link Annotation} used to wire Weld {@link Interceptor}s for methods annotated with {@link Timed}.
  */
 @InterceptorBinding
 @Retention(RUNTIME)

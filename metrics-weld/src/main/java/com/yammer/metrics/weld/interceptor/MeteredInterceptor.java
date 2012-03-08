@@ -12,8 +12,8 @@ import com.yammer.metrics.core.MetricsRegistry;
 import com.yammer.metrics.weld.annotation.WeldMetered;
 
 /**
- * A method interceptor which creates a {@link Meter} for the declaring class with the given name (or the method's name,
- * if none was provided), and which measures the rate at which the annotated method is invoked.
+ * A method {@link Interceptor} which creates a {@link Meter} for the declaring class with the given name (or the
+ * method's name, if none was provided), and which measures the rate at which the annotated method is invoked.
  */
 @Interceptor
 @WeldMetered
