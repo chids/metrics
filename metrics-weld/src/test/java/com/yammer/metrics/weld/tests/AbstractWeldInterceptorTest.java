@@ -14,7 +14,7 @@ import com.yammer.metrics.weld.MetricsWeldExtension;
 import com.yammer.metrics.weld.interceptor.TimedInterceptor;
 
 @RunWith(Arquillian.class)
-public abstract class AbstractWeldInterceptorTest { // implements MetricProcessor<Object> {
+public abstract class AbstractWeldInterceptorTest {
 
 	@Inject
 	protected MetricsRegistry registry;

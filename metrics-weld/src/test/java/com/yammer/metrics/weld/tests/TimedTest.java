@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.junit.After;
 import org.junit.Test;
 
 import com.yammer.metrics.core.Metric;
