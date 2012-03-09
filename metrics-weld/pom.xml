@@ -72,4 +72,25 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12</version>
+				<configuration>
+				<!--
+				I haven't been able to muster the energy to figure out
+				why concurrent tests doesn't work. I'm guessing it's
+				about Arquillian in general and possibly the static
+				AbstractWeldInterceptorTest.createDeployment()
+				method - but it's just only that, guesswork. 
+				 -->
+					<parallel>classes</parallel>
+					<threadCount>1</threadCount>
+					<perCoreThreadCount>false</perCoreThreadCount>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
