@@ -2,6 +2,8 @@ package com.yammer.metrics.core;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.yammer.metrics.core.Measurement.Extractor;
+
 /**
  * An incrementing and decrementing counter metric.
  */
@@ -63,5 +65,10 @@ public class Counter implements Metric {
     @Override
     public <T> void processWith(MetricProcessor<T> processor, MetricName name, T context) throws Exception {
         processor.processCounter(name, this, context);
+    }
+
+    @Override
+    public Object apply(Extractor extractor) {
+        return extractor.get(this);
     }
 }

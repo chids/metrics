@@ -1,5 +1,6 @@
 package com.yammer.metrics.core;
 
+import com.yammer.metrics.core.Measurement.Extractor;
 import com.yammer.metrics.stats.EWMA;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -129,5 +130,10 @@ public class Meter implements Metered, Stoppable {
 
     private double convertNsRate(double ratePerNs) {
         return ratePerNs * (double) rateUnit.toNanos(1);
+    }
+
+    @Override
+    public Object apply(Extractor extractor) {
+        return extractor.get(this);
     }
 }

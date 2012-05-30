@@ -1,5 +1,6 @@
 package com.yammer.metrics.core;
 
+import com.yammer.metrics.core.Measurement.Extractor;
 import com.yammer.metrics.stats.ExponentiallyDecayingSample;
 import com.yammer.metrics.stats.Sample;
 import com.yammer.metrics.stats.Snapshot;
@@ -243,5 +244,10 @@ public class Histogram implements Metric, Sampling, Summarizable {
     @Override
     public <T> void processWith(MetricProcessor<T> processor, MetricName name, T context) throws Exception {
         processor.processHistogram(name, this, context);
+    }
+
+    @Override
+    public Object apply(Extractor extractor) {
+        return extractor.get(this);
     }
 }

@@ -1,5 +1,7 @@
 package com.yammer.metrics.core;
 
+import com.yammer.metrics.core.Measurement.Extractor;
+
 /**
  * A tag interface to indicate that a class is a metric.
  */
@@ -14,4 +16,6 @@ public interface Metric {
      * @throws Exception if something goes wrong
      */
     <T> void processWith(MetricProcessor<T> processor, MetricName name, T context) throws Exception;
+    
+    public Object apply(Extractor extractor);
 }

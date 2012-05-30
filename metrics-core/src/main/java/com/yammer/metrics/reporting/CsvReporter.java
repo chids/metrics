@@ -2,7 +2,6 @@ package com.yammer.metrics.reporting;
 
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.*;
-import com.yammer.metrics.stats.Snapshot;
 import com.yammer.metrics.core.MetricPredicate;
 
 import java.io.File;
@@ -19,8 +18,7 @@ import java.util.concurrent.TimeUnit;
  * A reporter which periodically appends data from each metric to a metric-specific CSV file in
  * an output directory.
  */
-public class CsvReporter extends AbstractPollingReporter implements
-                                                         MetricProcessor<CsvReporter.Context> {
+public class CsvReporter extends AbstractPollingReporter {
 
     /**
      * Enables the CSV reporter for the default metrics registry, and causes it to write to files in
@@ -150,85 +148,18 @@ public class CsvReporter extends AbstractPollingReporter implements
                 final MetricName metricName = entry.getKey();
                 final Metric metric = entry.getValue();
                 if (predicate.matches(metricName, metric)) {
-                    final Context context = new Context() {
-                        @Override
-                        public PrintStream getStream(String header) throws IOException {
-                            final PrintStream stream = getPrintStream(metricName, header);
-                            stream.print(time);
-                            stream.print(',');
-                            return stream;
-                        }
-
-                    };
-                    metric.processWith(this, entry.getKey(), context);
+                    final StringBuilder header = new StringBuilder("# time");
+                    final StringBuilder values = new StringBuilder().append(time);
+                    for (Entry<Measurement, Object> e : predicate.filter(metric).entrySet()) {
+                        header.append(',').append(e.getKey().name);
+                        values.append(',').append(e.getValue());
+                    }
+                    getPrintStream(metricName, header.toString()).append(values).flush();
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void processMeter(MetricName name, Metered meter, Context context) throws IOException {
-        final PrintStream stream = context.getStream(
-                "# time,count,1 min rate,mean rate,5 min rate,15 min rate");
-        stream.append(new StringBuilder()
-                              .append(meter.getCount()).append(',')
-                              .append(meter.getOneMinuteRate()).append(',')
-                              .append(meter.getMeanRate()).append(',')
-                              .append(meter.getFiveMinuteRate()).append(',')
-                              .append(meter.getFifteenMinuteRate()).toString())
-              .println();
-        stream.flush();
-    }
-
-    @Override
-    public void processCounter(MetricName name, Counter counter, Context context) throws IOException {
-        final PrintStream stream = context.getStream("# time,count");
-        stream.println(counter.getCount());
-        stream.flush();
-    }
-
-    @Override
-    public void processHistogram(MetricName name, Histogram histogram, Context context) throws IOException {
-        final PrintStream stream = context.getStream("# time,min,max,mean,median,stddev,95%,99%,99.9%");
-        final Snapshot snapshot = histogram.getSnapshot();
-        stream.append(new StringBuilder()
-                              .append(histogram.getMin()).append(',')
-                              .append(histogram.getMax()).append(',')
-                              .append(histogram.getMean()).append(',')
-                              .append(snapshot.getMedian()).append(',')
-                              .append(histogram.getStdDev()).append(',')
-                              .append(snapshot.get95thPercentile()).append(',')
-                              .append(snapshot.get99thPercentile()).append(',')
-                              .append(snapshot.get999thPercentile()).toString())
-                .println();
-        stream.println();
-        stream.flush();
-    }
-
-    @Override
-    public void processTimer(MetricName name, Timer timer, Context context) throws IOException {
-        final PrintStream stream = context.getStream("# time,min,max,mean,median,stddev,95%,99%,99.9%");
-        final Snapshot snapshot = timer.getSnapshot();
-        stream.append(new StringBuilder()
-                              .append(timer.getMin()).append(',')
-                              .append(timer.getMax()).append(',')
-                              .append(timer.getMean()).append(',')
-                              .append(snapshot.getMedian()).append(',')
-                              .append(timer.getStdDev()).append(',')
-                              .append(snapshot.get95thPercentile()).append(',')
-                              .append(snapshot.get99thPercentile()).append(',')
-                              .append(snapshot.get999thPercentile()).toString())
-                .println();
-        stream.flush();
-    }
-
-    @Override
-    public void processGauge(MetricName name, Gauge<?> gauge, Context context) throws IOException {
-        final PrintStream stream = context.getStream("# time,value");
-        stream.println(gauge.getValue());
-        stream.flush();
     }
 
     @Override

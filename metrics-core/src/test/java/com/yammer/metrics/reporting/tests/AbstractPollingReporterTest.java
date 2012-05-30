@@ -1,13 +1,10 @@
 package com.yammer.metrics.reporting.tests;
 
-import com.yammer.metrics.core.*;
-import com.yammer.metrics.reporting.AbstractPollingReporter;
-import com.yammer.metrics.stats.Snapshot;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.Stubber;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -16,9 +13,28 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.Stubber;
+
+import com.yammer.metrics.core.Clock;
+import com.yammer.metrics.core.Counter;
+import com.yammer.metrics.core.Gauge;
+import com.yammer.metrics.core.Histogram;
+import com.yammer.metrics.core.Measurement.Extractor;
+import com.yammer.metrics.core.Meter;
+import com.yammer.metrics.core.Metered;
+import com.yammer.metrics.core.Metric;
+import com.yammer.metrics.core.MetricName;
+import com.yammer.metrics.core.MetricProcessor;
+import com.yammer.metrics.core.MetricsRegistry;
+import com.yammer.metrics.core.Sampling;
+import com.yammer.metrics.core.Summarizable;
+import com.yammer.metrics.core.Timer;
+import com.yammer.metrics.reporting.AbstractPollingReporter;
+import com.yammer.metrics.stats.Snapshot;
 
 public abstract class AbstractPollingReporterTest {
 
@@ -135,6 +151,7 @@ public abstract class AbstractPollingReporterTest {
     static Counter createCounter(long count) throws Exception {
         final Counter mock = mock(Counter.class);
         when(mock.getCount()).thenReturn(count);
+        when(mock.apply(any(Extractor.class))).thenCallRealMethod();
         return configureMatcher(mock, doAnswer(new MetricsProcessorAction() {
             @Override
             void delegateToProcessor(MetricProcessor<Object> processor, MetricName name, Object context) throws Exception {
@@ -145,6 +162,7 @@ public abstract class AbstractPollingReporterTest {
 
     static Histogram createHistogram() throws Exception {
         final Histogram mock = mock(Histogram.class);
+        when(mock.apply(any(Extractor.class))).thenCallRealMethod();
         setupSummarizableMock(mock);
         setupSamplingMock(mock);
         return configureMatcher(mock, doAnswer(new MetricsProcessorAction() {
@@ -159,6 +177,7 @@ public abstract class AbstractPollingReporterTest {
     static Gauge<String> createGauge() throws Exception {
         @SuppressWarnings("unchecked")
         final Gauge<String> mock = mock(Gauge.class);
+        when(mock.apply(any(Extractor.class))).thenCallRealMethod();
         when(mock.getValue()).thenReturn("gaugeValue");
         return configureMatcher(mock, doAnswer(new MetricsProcessorAction() {
             @Override
@@ -171,6 +190,7 @@ public abstract class AbstractPollingReporterTest {
 
     static Timer createTimer() throws Exception {
         final Timer mock = mock(Timer.class);
+        when(mock.apply(any(Extractor.class))).thenCallRealMethod();
         when(mock.getDurationUnit()).thenReturn(TimeUnit.MILLISECONDS);
         setupSummarizableMock(mock);
         setupMeteredMock(mock);
@@ -185,6 +205,7 @@ public abstract class AbstractPollingReporterTest {
 
     static Meter createMeter() throws Exception {
         final Meter mock = mock(Meter.class);
+        when(mock.apply(any(Extractor.class))).thenCallRealMethod();
         setupMeteredMock(mock);
         return configureMatcher(mock, doAnswer(new MetricsProcessorAction() {
             @Override

@@ -4,6 +4,7 @@ import com.yammer.metrics.core.Clock;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricPredicate;
 import com.yammer.metrics.core.MetricsRegistry;
+import static com.yammer.metrics.core.Measurement.*;
 import com.yammer.metrics.reporting.AbstractPollingReporter;
 import com.yammer.metrics.reporting.CsvReporter;
 
@@ -16,7 +17,12 @@ public class CsvReporterTest extends AbstractPollingReporterTest {
 
     @Override
     protected AbstractPollingReporter createReporter(MetricsRegistry registry, final OutputStream out, Clock clock) throws Exception {
-        return new CsvReporter(registry, MetricPredicate.ALL, new File("/tmp"), clock) {
+        return new CsvReporter(
+                registry,
+                new MetricPredicate(
+                        Count, Min, Max, Mean, Median, StdDev, p95, p99, p999, Rate1m, RateMean, Rate5m, Rate15m, Value),
+                new File("/tmp"),
+                clock) {
             @Override
             protected PrintStream createStreamForMetric(MetricName metricName) throws IOException {
                 return new PrintStream(out);
@@ -43,8 +49,8 @@ public class CsvReporterTest extends AbstractPollingReporterTest {
 
     @Override
     public String[] expectedTimerResult() {
-        return new String[]{"# time,min,max,mean,median,stddev,95%,99%,99.9%",
-                            "5,1.0,3.0,2.0,0.4995,1.5,0.9499499999999999,0.98999,0.998999\n"};
+        return new String[]{"# time,count,min,max,mean,median,stddev,95%,99%,99.9%,1 min rate,mean rate,5 min rate,15 min rate",
+                            "5,1,1.0,3.0,2.0,0.4995,1.5,0.9499499999999999,0.98999,0.998999,1.0,2.0,5.0,15.0\n"};
     }
 
     @Override

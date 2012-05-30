@@ -1,6 +1,7 @@
 package com.yammer.metrics.core;
 
 import com.yammer.metrics.core.Histogram.SampleType;
+import com.yammer.metrics.core.Measurement.Extractor;
 import com.yammer.metrics.stats.Snapshot;
 
 import java.util.concurrent.Callable;
@@ -208,6 +209,11 @@ public class Timer implements Metered, Stoppable, Sampling, Summarizable {
             histogram.update(duration);
             meter.mark();
         }
+    }
+
+    @Override
+    public Object apply(Extractor extractor) {
+        return extractor.get(this);
     }
 
     private double convertFromNS(double ns) {

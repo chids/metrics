@@ -1,5 +1,7 @@
 package com.yammer.metrics.core;
 
+import com.yammer.metrics.core.Measurement.Extractor;
+
 
 /**
  * A gauge metric is an instantaneous reading of a particular value. To instrument a queue's depth,
@@ -26,5 +28,10 @@ public abstract class Gauge<T> implements Metric {
     @Override
     public <U> void processWith(MetricProcessor<U> processor, MetricName name, U context) throws Exception {
         processor.processGauge(name, this, context);
+    }
+
+    @Override
+    public Object apply(Extractor extractor) {
+        return extractor.get(this);
     }
 }
